@@ -1,39 +1,265 @@
 <?php
 
-define( 'OAUTH_ACCESS_TOKEN_ENDPOINT', 'https://public-api.wordpress.com/oauth2/token' );
-define( 'OAUTH_AUTHORIZE_ENDPOINT', 'https://public-api.wordpress.com/oauth2/authorize?client_id='.OAUTH_KEY.'&response_type=code&redirect_uri='.urlencode( OAUTH_REDIRECT_URL ) );
-define( 'OAUTH_AUTHENTICATE_URL', 'https://public-api.wordpress.com/oauth2/authenticate' );
-
 class WPCOM_Rest_Client {
-	const API_NEW_POST     = 'https://public-api.wordpress.com/rest/v1/sites/%d/posts/new';
-	const API_EDIT_POST    = 'https://public-api.wordpress.com/rest/v1/sites/%d/posts/%d';
-	const API_USER_DETAILS = 'https://public-api.wordpress.com/rest/v1/me/';
-	const API_BLOG_DETAILS = 'https://public-api.wordpress.com/rest/v1/sites/%d';
-	const API_DELETE_POST  = 'https://public-api.wordpress.com/rest/v1/sites/%d/posts/%d/delete';
+	const REQUEST_METHOD_GET = 'GET';
+	const REQUEST_METHOD_POST = 'POST';
 
-	private $access_token;
+	const OAUTH_ACCESS_TOKEN_ENDPOINT = '/token';
+	const OAUTH_AUTHORIZE_ENDPOINT = '/authorize';
+	const OAUTH_AUTHENTICATE_URL = '/authenticate';
 
-	public function __construct( $access_token = false ) {
-		$this->access_token = $access_token;
+	const DEFAULT_API_BASE_URL = 'https://public-api.wordpress.com/rest/';
+	const DEFAULT_OAUTH_BASE_URL = 'https://public-api.wordpress.com/oauth2';
+
+	private $request_methods = array( 'GET', 'POST' );
+
+	private $api_transport;
+	private $oauth_base_url = self::DEFAULT_OAUTH_BASE_URL;
+	private $api_base_url = self::DEFAULT_API_BASE_URL;
+
+	private $auth_key;
+	private $auth_secret;
+	private $auth_token;
+
+	public function __construct( WPCOM_REST_API_Transport $transport ) {
+		$this->api_transport = $transport;
 	}
 
-	private function api_request( $url, $auth_header = null, $post_data = null ) {
+	public function set_api_base_url( $url ) {
+		$this->api_base_url = $url;
+	}
+
+	public function set_oauth_base_url( $url ) {
+		$this->oauth_base_url = $url;
+	}
+
+	public function set_auth_key( $key, $secret ) {
+		$this->auth_key = $key;
+		$this->auth_secret = $secret;
+	}
+
+	public function set_auth_token( $token ) {
+		$this->auth_token = $token;
+	}
+
+	public function send_authorized_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+		if ( ! is_array( $headers ) ) {
+			$headers = array(); 
+		}
+
+		if ( $this->auth_token ) { 
+			$headers[] = sprintf( 'Authorization: Bearer %s', $this->auth_token );
+		}
+
+		return $this->send_api_request( $path, $method, $params, $post_data, $headers, $is_multipart );
+	}
+
+	public function send_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+		$url = $this->build_url( $this->api_base_url, $path, $params );
+		return $this->send_request( $url, $method, $params, $post_data, $headers, $is_multipart );
+	}
+
+	private function send_request( $url, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+
+		if ( ! $this->is_valid_request_method( $method ) ) {
+			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->request_methods ) ) );
+		}
+
+		if ( ! is_array( $headers ) ) {
+			$headers = array();
+		}
+
+		if ( $is_multipart ) {
+			$headers[] = 'Content-Type: multipart/form-data';
+		}
+
+		// TODO: set UA to identify requests
+
+		return $this->api_transport->send_request( $url, $method, $post_data, $headers );
+	}
+
+	private function build_url( $url, $path, $params ) {
+		if ( $path ) {
+			$url = sprintf( '%s/%s', rtrim( $url, '/\\' ), ltrim( $path, '/\\' ) );
+		}
+
+		if ( ! parse_url( $url, PHP_URL_PATH ) ) {
+			$url .= '?';
+		}
+
+		$url .= http_build_query( $params );
+
+		return $url; 
+	}
+
+	private function is_valid_request_method( $method ) {
+		return in_array( $method, $this->get_valid_request_methods() );
+	}
+
+	private function get_valid_request_methods() {
+		return array( self::REQUEST_METHOD_GET, self::REQUEST_METHOD_POST );
+	}
+
+	public function get_posts( $site_id, $params ) {
+		$url = sprintf( 'v1/sites/%s/posts', $site_id );
+		return $this->send_api_request( $url, self::REQUEST_METHOD_GET, $params );
+	}
+
+	public function get_post( $site_id, $post_id_or_slug ) {
+		if ( is_numeric( $post_id_or_slug ) ) {
+			return $this->get_post_by_id( $site_id, $post_id_or_slug );
+		} else {
+			return $this->get_post_by_slug( $site_id, $post_id_or_slug );
+		}
+	}
+
+	public function get_post_by_id( $site_id, $post_id ) {
+		$url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_id );
+		return $this->send_api_request( $url, self::REQUEST_METHOD_GET );
+	}
+
+	public function get_post_by_slug( $site_id, $post_slug ) {
+		$url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_slug );
+
+		return $this->send_api_request( $url, self::REQUEST_METHOD_GET );
+	}
+
+	public function new_post( $site_id, $post_data ) {	
+		$url = sprintf( 'v1/sites/%s/posts/new', $site_id );
+
+		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST, null, $post_data );
+	}
+
+	public function update_post( $site_id, $post_id, $post_data ) {
+		$edit_post_url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_id );
+
+		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST, null, $post_data );
+	}
+
+	public function delete_post( $site_id, $post_id ) {
+		$url = sprintf( 'v1/sites/%s/posts/%d/delete', $site_id, $post_id );
+
+		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST );
+	}
+
+	public function get_user_details() {
+		$url = '/me/';
+
+		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_GET );
+	}
+
+	public function get_blog_details( $blog_id ) {
+		$url = sprintf( 'v1/sites/%s', $blog_id );
+
+		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_GET );
+	}
+
+	public function request_access_token( $authorization_code, $redirect_uri ) {
+		$post_data = array(
+			'client_id'     => $this->auth_key,
+			'client_secret' => $this->auth_secret,
+			'redirect_uri'  => $redirect_uri,
+			'code'          => $authorization_code,
+			'grant_type'    => 'authorization_code'
+		);
+
+		return $this->send_request( $this->oauth_base_url, OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data, false );
+	}
+
+	public function get_blog_auth_url( $blog_url, $redirect_uri ) {
+		if ( empty( $this->auth_key ) ) {
+			throw new BadMethodCallException( 'Please specify a valid auth_key.' );
+		}
+
+		return $this->build_url( $this->oauth_base_url, self::OAUTH_AUTHORIZE_ENDPOINT, array(
+			'blog' => $blog_url,
+			'client_id' => $this->auth_key,
+			'redirect_uri' => $redirect_uri,
+			'response_type' => 'code',
+		) );
+	}
+}
+
+abstract class WPCOM_REST_API_Transport {
+	private $response_codes = array( 200, 301, 302 );	
+
+	abstract public function send_request( $url, $method, $post_data = array(), $headers = array() );
+
+	protected function handle_success( $body ) {
+		$decoded_body = json_decode( $body );
+
+		if ( ! $decoded_body ) {
+			throw new WPCOM_REST_Exception( 'Failed to decode data from endpoint', 'invalid-json' );
+		}
+
+		if ( isset( $decoded->error ) ) {
+			if ( isset( $decoded_body->error_description ) ) {
+				$error_message = $decoded_body->error_description;
+			} elseif ( isset( $decoded_body->message ) ) {
+				$error_message = $decoded_body->message;
+			} else {
+				$error_message = '';
+			}
+	
+			return $this->handle_error( $error_message, $decoded_body->error );
+		}
+
+		return $decoded_body;
+	}
+
+	protected function handle_error( $message, $code ) {
+		throw new WPCOM_REST_Exception( $message, $code );
+	}
+
+	protected function is_valid_response_code( $response_code ) {
+		return in_array( $response_code, $this->response_codes );
+	}
+}
+
+class WPCOM_REST_API_Transport_WP_HTTP_API extends WPCOM_REST_API_Transport {
+
+	public function __construct() {
+		if ( ! class_exists( 'WP_Http' ) ) {
+			throw new BadMethodCallException( 'This transport requires the WordPress HTTP API.' );
+		}
+	}
+
+	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
+		$args = array(
+			'body' => $post_data,
+			'headers' => $headers,
+		);
+
+		if ( WPCOM_REST_Client::REQUEST_METHOD_GET === $method ) {
+			$response = wp_remote_get( $url, $args );
+		} elseif ( WPCOM_REST_Client::REQUEST_METHOD_POST === $method ) {
+			$response = wp_remote_post( $url, $args );
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response ); 
+		$response_body = wp_remote_retrieve_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $this->handle_error( $response->get_error_message(), $response->get_error_code() );
+		} elseif ( ! $this->is_valid_response_code( $response_code ) ) {
+			return $this->handle_error( $response_body, $response_code ); 
+		}
+
+		$body = $response_body;
+		return $this->handle_success( $body );
+	}
+}	
+
+class WPCOM_REST_API_Transport_Curl extends WPCOM_REST_API_Transport {
+
+	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
 		$curl = curl_init( $url );
 
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_FAILONERROR, false );
-		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
 
-		if ( $auth_header ) {
-			if ( is_string( $auth_header ) )
-				$auth_header = array( $auth_header );
-
-			curl_setopt( $curl, CURLOPT_HTTPHEADER, $auth_header );
-		}
-
-		if ( !empty( $post_data ) ) {
+		if ( ! empty( $post_data ) ) {
 			curl_setopt( $curl, CURLOPT_POST, 1 );
-			@curl_setopt( $curl, CURLOPT_POSTFIELDS, $post_data );
+			curl_setopt( $curl, CURLOPT_POSTFIELDS, $post_data );
 		}
 
 		$response = curl_exec( $curl );
@@ -42,69 +268,28 @@ class WPCOM_Rest_Client {
 
 		curl_close( $curl );
 
-		if ( is_array( $info ) && isset( $info['http_code'] ) && !in_array( $info['http_code'], array( 200, 301, 302 ) ) && $info['size_download'] == 0 )
-			return new WP_Error( 'curl', 'Request endpoint failed with HTTP '.$info['http_code'] );
-		elseif ( !$response )
-			return new WP_Error( 'curl', $error );
-
-		return $response;
-	}
-
-	private function request_and_decode( $url, $post_data ) {
-		$response = $this->api_request( $url, 'Authorization: Bearer '.$this->access_token, $post_data );
-
-		if ( is_wp_error( $response ) )
-			return $response;
-
-		$decoded = json_decode( $response );
-
-		if ( $decoded ) {
-			if ( isset( $decoded->error ) && ( isset( $decoded->message ) || isset( $decoded->error_description ) ) )
-				return new WP_Error( $decoded->error, isset( $decoded->error_description ) ? $decoded->error_description : $decoded->message );
-
-			return $decoded;
+		$response_code = $this->get_response_code_from_request( $info );
+		if ( ! $this->is_valid_response_code( $response_code ) ) {
+			return $this->handle_error( sprintf( 'HTTP error for request; response: %s', $response ), $response_code );
+		} elseif ( ! $response ) {
+			return $this->handle_error( sprintf( 'Curl error: %s; info: %s', $error, var_export( $info, true ) ), 'curl-error' );
 		}
 
-		return new WP_Error( 'send', 'Failed to decode data from endpoint' );
+		return json_decode( $response );
 	}
 
-	public function new_post( $site_id, $post_data ) {
-		$new_post_url = sprintf( self::API_NEW_POST, $site_id );
+	private function get_response_code_from_request( $info ) {
+		if ( is_array( $info ) && isset( $info['http_code'] ) ) {
+			return $info['http_code'];
+		}
 
-		return $this->request_and_decode( $new_post_url, $post_data );
+		return null;
 	}
+}
 
-	public function update_post( $site_id, $post_id, $post_data ) {
-		$edit_post_url = sprintf( self::API_EDIT_POST, $site_id, $post_id );
-
-		return $this->request_and_decode( $edit_post_url, $post_data );
-	}
-
-	public function get_user_details() {
-		return $this->request_and_decode( self::API_USER_DETAILS, array() );
-	}
-
-	public function get_blog_details( $blog_id ) {
-		return $this->request_and_decode( sprintf( self::API_BLOG_DETAILS, $blog_id ), array() );
-	}
-
-	public function delete_blog_post( $blog_id, $post_id ) {
-		return $this->request_and_decode( sprintf( self::API_DELETE_POST, $blog_id, $post_id ), array( 'pretty' => false ) );
-	}
-
-	public function request_access_token( $authorize_code, $client_key, $client_secret, $redirect_url ) {
-		$params = array(
-			'client_id'     => $client_key,
-			'redirect_uri'  => $redirect_url,
-			'client_secret' => $client_secret,
-			'code'          => $authorize_code,
-			'grant_type'    => 'authorization_code'
-		);
-
-		return $this->request_and_decode( OAUTH_ACCESS_TOKEN_ENDPOINT, $params );
-	}
-
-	public static function get_blog_auth_url( $blog_url ) {
-		return OAUTH_AUTHORIZE_ENDPOINT.'&blog='.urlencode( $blog_url );
+class WPCOM_REST_Exception extends Exception {
+	public function __construct( $message, $code = 0, Exception $previous = null ) {
+		// Mandatory message
+        	parent::__construct( $message, $code, $previous );
 	}
 }
