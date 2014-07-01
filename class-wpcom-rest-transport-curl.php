@@ -13,6 +13,10 @@ class WPCOM_REST_Transport_Curl extends WPCOM_REST_Transport {
 			curl_setopt( $curl, CURLOPT_POSTFIELDS, $post_data );
 		}
 
+		if ( ! empty( $headers ) ) {
+			curt_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+		}
+
 		$response = curl_exec( $curl );
 		$info     = curl_getinfo( $curl );
 		$error    = curl_error( $curl );
