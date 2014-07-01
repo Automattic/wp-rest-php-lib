@@ -51,7 +51,7 @@ class WPCOM_Rest_Client {
 		$this->oauth_base_url = $url;
 	}
 	public function get_oauth_base_url() {
-		return $this->oauth_base_url();
+		return $this->oauth_base_url;
 	}
 
 	public function set_auth_key( $key, $secret ) {
@@ -114,7 +114,7 @@ class WPCOM_Rest_Client {
 			$url = sprintf( '%s/%s', rtrim( $url, '/\\' ), ltrim( $path, '/\\' ) );
 		}
 
-		if ( ! parse_url( $url, PHP_URL_PATH ) ) {
+		if ( ! parse_url( $url, PHP_URL_QUERY ) ) {
 			$url .= '?';
 		}
 
