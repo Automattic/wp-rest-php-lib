@@ -1,5 +1,13 @@
 <?php
 
+// TODO: replace with spl-autoload?
+$base_dir =  dirname( __FILE__ );
+require_once( $base_dir . '/class-wpcom-rest-exception.php' );
+require_once( $base_dir . '/class-wpcom-rest-transport.php' );
+require_once( $base_dir . '/class-wpcom-rest-transport-curl.php' );
+require_once( $base_dir . '/class-wpcom-rest-exception-wp-http-api.php' );
+unset( $base_dir );
+
 class WPCOM_Rest_Client {
 	const REQUEST_METHOD_GET = 'GET';
 	const REQUEST_METHOD_POST = 'POST';
@@ -22,10 +30,10 @@ class WPCOM_Rest_Client {
 	private $auth_token;
 
 	public function __construct() {
-		$this->set_api_transport( new WPCOM_REST_API_Transport_Curl ); 
+		$this->set_api_transport( new WPCOM_REST_Transport_Curl ); 
 	}
 	
-	public function set_api_transport( WPCOM_REST_API_Transport $transport ) {
+	public function set_api_transport( WPCOM_REST_Transport $transport ) {
 		$this->api_transport = $transport;
 	}
 
@@ -184,116 +192,3 @@ class WPCOM_Rest_Client {
 	}
 }
 
-abstract class WPCOM_REST_API_Transport {
-	private $response_codes = array( 200, 301, 302 );	
-
-	abstract public function send_request( $url, $method, $post_data = array(), $headers = array() );
-
-	protected function handle_success( $body ) {
-		$decoded_body = json_decode( $body );
-
-		if ( ! $decoded_body ) {
-			throw new WPCOM_REST_Exception( 'Failed to decode data from endpoint', 'invalid-json' );
-		}
-
-		if ( isset( $decoded->error ) ) {
-			if ( isset( $decoded_body->error_description ) ) {
-				$error_message = $decoded_body->error_description;
-			} elseif ( isset( $decoded_body->message ) ) {
-				$error_message = $decoded_body->message;
-			} else {
-				$error_message = '';
-			}
-	
-			return $this->handle_error( $error_message, $decoded_body->error );
-		}
-
-		return $decoded_body;
-	}
-
-	protected function handle_error( $message, $code ) {
-		throw new WPCOM_REST_Exception( $message, $code );
-	}
-
-	protected function is_valid_response_code( $response_code ) {
-		return in_array( $response_code, $this->response_codes );
-	}
-}
-
-class WPCOM_REST_API_Transport_WP_HTTP_API extends WPCOM_REST_API_Transport {
-
-	public function __construct() {
-		if ( ! class_exists( 'WP_Http' ) ) {
-			throw new BadMethodCallException( 'This transport requires the WordPress HTTP API.' );
-		}
-	}
-
-	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
-		$args = array(
-			'body' => $post_data,
-			'headers' => $headers,
-		);
-
-		if ( WPCOM_REST_Client::REQUEST_METHOD_GET === $method ) {
-			$response = wp_remote_get( $url, $args );
-		} elseif ( WPCOM_REST_Client::REQUEST_METHOD_POST === $method ) {
-			$response = wp_remote_post( $url, $args );
-		}
-
-		$response_code = wp_remote_retrieve_response_code( $response ); 
-		$response_body = wp_remote_retrieve_body( $response );
-		if ( is_wp_error( $response ) ) {
-			return $this->handle_error( $response->get_error_message(), $response->get_error_code() );
-		} elseif ( ! $this->is_valid_response_code( $response_code ) ) {
-			return $this->handle_error( $response_body, $response_code ); 
-		}
-
-		$body = $response_body;
-		return $this->handle_success( $body );
-	}
-}	
-
-class WPCOM_REST_API_Transport_Curl extends WPCOM_REST_API_Transport {
-
-	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
-		$curl = curl_init( $url );
-
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
-		curl_setopt( $curl, CURLOPT_FAILONERROR, false );
-
-		if ( ! empty( $post_data ) ) {
-			curl_setopt( $curl, CURLOPT_POST, 1 );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, $post_data );
-		}
-
-		$response = curl_exec( $curl );
-		$info     = curl_getinfo( $curl );
-		$error    = curl_error( $curl );
-
-		curl_close( $curl );
-
-		$response_code = $this->get_response_code_from_request( $info );
-		if ( ! $this->is_valid_response_code( $response_code ) ) {
-			return $this->handle_error( sprintf( 'HTTP error for request; response: %s', $response ), $response_code );
-		} elseif ( ! $response ) {
-			return $this->handle_error( sprintf( 'Curl error: %s; info: %s', $error, var_export( $info, true ) ), 'curl-error' );
-		}
-
-		return json_decode( $response );
-	}
-
-	private function get_response_code_from_request( $info ) {
-		if ( is_array( $info ) && isset( $info['http_code'] ) ) {
-			return $info['http_code'];
-		}
-
-		return null;
-	}
-}
-
-class WPCOM_REST_Exception extends Exception {
-	public function __construct( $message, $code = 0, Exception $previous = null ) {
-		// Mandatory message
-        	parent::__construct( $message, $code, $previous );
-	}
-}
