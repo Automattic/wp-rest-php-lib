@@ -8,7 +8,7 @@ class WPCOM_Rest_Client {
 	const OAUTH_AUTHORIZE_ENDPOINT = '/authorize';
 	const OAUTH_AUTHENTICATE_URL = '/authenticate';
 
-	const DEFAULT_API_BASE_URL = 'https://public-api.wordpress.com/rest/';
+	const DEFAULT_API_BASE_URL = 'https://public-api.wordpress.com/rest';
 	const DEFAULT_OAUTH_BASE_URL = 'https://public-api.wordpress.com/oauth2';
 
 	private $request_methods = array( 'GET', 'POST' );
