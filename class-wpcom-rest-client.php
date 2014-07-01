@@ -5,7 +5,7 @@ $base_dir =  dirname( __FILE__ );
 require_once( $base_dir . '/class-wpcom-rest-exception.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport-curl.php' );
-require_once( $base_dir . '/class-wpcom-rest-exception-wp-http-api.php' );
+require_once( $base_dir . '/class-wpcom-rest-transport-wp-http-api.php' );
 unset( $base_dir );
 
 class WPCOM_Rest_Client {
