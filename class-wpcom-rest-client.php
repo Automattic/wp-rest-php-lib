@@ -36,22 +36,41 @@ class WPCOM_Rest_Client {
 	public function set_api_transport( WPCOM_REST_Transport $transport ) {
 		$this->api_transport = $transport;
 	}
+	public function get_api_transport() {
+		return $this->api_transport;
+	}
 
 	public function set_api_base_url( $url ) {
 		$this->api_base_url = $url;
 	}
+	public function get_api_base_url() {
+		return $this->api_base_url;
+	}
 
 	public function set_oauth_base_url( $url ) {
 		$this->oauth_base_url = $url;
+	}
+	public function get_oauth_base_url() {
+		return $this->oauth_base_url();
 	}
 
 	public function set_auth_key( $key, $secret ) {
 		$this->auth_key = $key;
 		$this->auth_secret = $secret;
 	}
+	public function get_auth_key() {
+		return $this->auth_key;
+	}
+	public function get_auth_secret() {
+		return $this->auth_secret;
+	}
+
 
 	public function set_auth_token( $token ) {
 		$this->auth_token = $token;
+	}
+	public function get_auth_token() {
+		return $this->auth_token;
 	}
 
 	public function send_authorized_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
