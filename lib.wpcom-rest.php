@@ -21,7 +21,11 @@ class WPCOM_Rest_Client {
 	private $auth_secret;
 	private $auth_token;
 
-	public function __construct( WPCOM_REST_API_Transport $transport ) {
+	public function __construct() {
+		$this->set_api_transport( new WPCOM_REST_API_Transport_Curl ); 
+	}
+	
+	public function set_api_transport( WPCOM_REST_API_Transport $transport ) {
 		$this->api_transport = $transport;
 	}
 
