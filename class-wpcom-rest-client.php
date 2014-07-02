@@ -6,6 +6,10 @@ require_once( $base_dir . '/class-wpcom-rest-exception.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport-curl.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport-wp-http-api.php' );
+require_once( $base_dir . '/class-wpcom-rest-object.php' );
+require_once( $base_dir . '/class-wpcom-rest-object-site.php' );
+require_once( $base_dir . '/class-wpcom-rest-object-post.php' );
+require_once( $base_dir . '/class-wpcom-rest-object-me.php' );
 unset( $base_dir );
 
 class WPCOM_Rest_Client {
@@ -65,7 +69,6 @@ class WPCOM_Rest_Client {
 		return $this->auth_secret;
 	}
 
-
 	public function set_auth_token( $token ) {
 		$this->auth_token = $token;
 	}
@@ -73,6 +76,7 @@ class WPCOM_Rest_Client {
 		return $this->auth_token;
 	}
 
+	// TODO: remove this method; always send through send_api_request (to handle private sites)
 	public function send_authorized_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
 		if ( ! is_array( $headers ) ) {
 			$headers = array(); 
@@ -129,60 +133,6 @@ class WPCOM_Rest_Client {
 
 	private function get_valid_request_methods() {
 		return array( self::REQUEST_METHOD_GET, self::REQUEST_METHOD_POST );
-	}
-
-	public function get_posts( $site_id, $params ) {
-		$url = sprintf( 'v1/sites/%s/posts', $site_id );
-		return $this->send_api_request( $url, self::REQUEST_METHOD_GET, $params );
-	}
-
-	public function get_post( $site_id, $post_id_or_slug ) {
-		if ( is_numeric( $post_id_or_slug ) ) {
-			return $this->get_post_by_id( $site_id, $post_id_or_slug );
-		} else {
-			return $this->get_post_by_slug( $site_id, $post_id_or_slug );
-		}
-	}
-
-	public function get_post_by_id( $site_id, $post_id ) {
-		$url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_id );
-		return $this->send_api_request( $url, self::REQUEST_METHOD_GET );
-	}
-
-	public function get_post_by_slug( $site_id, $post_slug ) {
-		$url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_slug );
-
-		return $this->send_api_request( $url, self::REQUEST_METHOD_GET );
-	}
-
-	public function new_post( $site_id, $post_data ) {	
-		$url = sprintf( 'v1/sites/%s/posts/new', $site_id );
-
-		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST, null, $post_data );
-	}
-
-	public function update_post( $site_id, $post_id, $post_data ) {
-		$edit_post_url = sprintf( 'v1/sites/%s/posts/%d', $site_id, $post_id );
-
-		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST, null, $post_data );
-	}
-
-	public function delete_post( $site_id, $post_id ) {
-		$url = sprintf( 'v1/sites/%s/posts/%d/delete', $site_id, $post_id );
-
-		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_POST );
-	}
-
-	public function get_user_details() {
-		$url = '/me/';
-
-		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_GET );
-	}
-
-	public function get_blog_details( $blog_id ) {
-		$url = sprintf( 'v1/sites/%s', $blog_id );
-
-		return $this->send_authorized_api_request( $url, self::REQUEST_METHOD_GET );
 	}
 
 	public function request_access_token( $authorization_code, $redirect_uri ) {
