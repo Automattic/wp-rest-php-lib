@@ -16,7 +16,7 @@ class WPCOM_REST_Object_Site extends WPCOM_REST_Object {
 	public function get() {
 		$url = sprintf( 'v1/sites/%s', $this->site_id );
 
-		return $this->client->send_authorized_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
+		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
 	}
 
 	public function get_posts( $params ) {

@@ -76,21 +76,13 @@ class WPCOM_Rest_Client {
 		return $this->auth_token;
 	}
 
-	// TODO: remove this method; always send through send_api_request (to handle private sites)
-	public function send_authorized_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
-		if ( ! is_array( $headers ) ) {
-			$headers = array(); 
-		}
+	public function send_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+		$url = $this->build_url( $this->api_base_url, $path, $params );
 
 		if ( $this->auth_token ) { 
 			$headers[] = sprintf( 'Authorization: Bearer %s', $this->auth_token );
 		}
 
-		return $this->send_api_request( $path, $method, $params, $post_data, $headers, $is_multipart );
-	}
-
-	public function send_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
-		$url = $this->build_url( $this->api_base_url, $path, $params );
 		return $this->send_request( $url, $method, $params, $post_data, $headers, $is_multipart );
 	}
 
