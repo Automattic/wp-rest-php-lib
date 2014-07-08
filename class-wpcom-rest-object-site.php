@@ -4,9 +4,13 @@ class WPCOM_REST_Object_Site extends WPCOM_REST_Object {
 	private $client;
 	private $site_id;
 
-	public function __construct( $site_id, WPCOM_REST_Client $client ) {
+	private function __construct( $site_id, WPCOM_REST_Client $client ) {
 		$this->site_id = $site_id;
 		$this->client = $client;
+	}
+
+	public function withId( $site_id, WPCOM_REST_Client $client ) {
+		return new self( $site_id, $client );
 	}
 
 	public function get() {
