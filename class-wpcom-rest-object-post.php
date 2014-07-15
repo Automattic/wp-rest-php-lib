@@ -1,14 +1,13 @@
 <?php
 
 class WPCOM_REST_Object_Post extends WPCOM_REST_Object {
-	private $client;
 	private $post_id;
 	private $site_id;
 
-	private function __construct( $post_id, $site_id, WPCOM_REST_Client $client ) {
+	protected function __construct( $post_id, $site_id, WPCOM_REST_Client $client ) {
+		parent::__construct( $client );
 		$this->post_id = $post_id;
 		$this->site_id = $site_id;
-		$this->client = $client;
 	}
 
 	public static function withId( $post_id, $site_id, WPCOM_REST_Client $client ) {
