@@ -37,5 +37,24 @@ class WPCOM_REST_Object_Post extends WPCOM_REST_Object {
 		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_POST );
 	}
 
+	public function get_comments() {
+		$url = sprintf( 'v1/sites/%s/posts/%d/replies', $this->site_id, $this->post_id );
+		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
+	}
+
+	public function get_likes() {
+		$url = sprintf( 'v1/sites/%s/posts/%d/likes', $this->site_id, $this->post_id );
+		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
+	}
+
+	public function get_reblogs() {
+		$url = sprintf( 'v1/sites/%s/posts/%d/reblogs', $this->site_id, $this->post_id );
+		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
+	}
+
+	public function get_related() {
+		$url = sprintf( 'v1/sites/%s/posts/%d/related', $this->site_id, $this->post_id );
+		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
+	}
 
 }
