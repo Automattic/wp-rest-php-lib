@@ -1,9 +1,12 @@
 <?php
 
 class WPCOM_REST_Object_Me extends WPCOM_REST_Object {
-	// TODO: should we maintain consistency with a private constructor?
 	protected function __construct( WPCOM_REST_Client $client ) {
 		parent::__construct( $client );
+	}
+
+	public static function withAuth( WPCOM_REST_Client $client ) {
+		return new self( $client );
 	}
 
 	public function get() {
