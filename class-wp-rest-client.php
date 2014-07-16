@@ -1,0 +1,85 @@
+<?php
+
+abstract class WP_REST_Client {
+	const REQUEST_METHOD_GET = 'GET';
+	const REQUEST_METHOD_POST = 'POST';
+	const REQUEST_METHOD_HEAD = 'HEAD';
+	const REQUEST_METHOD_PUT = 'PUT';
+	const REQUEST_METHOD_DELETE = 'DELETE';
+	const REQUEST_METHOD_PATCH = 'PATCH';
+
+	protected $api_transport;
+	protected $api_base_url;
+	protected $request_methods;
+
+	public function __construct() {
+		$this->set_api_transport( new WPCOM_REST_Transport_Curl ); 
+	}
+
+	protected abstract function authenticate_request( $url, $method, $params, $post_data, $headers, $is_multipart );	
+
+	public function send_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+		$url = $this->build_url( $this->api_base_url, $path, $params );
+
+		$this->authenticate_request( $url, $method, $params, $post_data, $headers, $is_multipart );
+
+		return $this->send_request( $url, $method, $params, $post_data, $headers, $is_multipart );
+	}
+
+	protected function send_request( $url, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
+
+		if ( ! $this->is_valid_request_method( $method ) ) {
+			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->get_valid_request_methods() ) ) );
+		}
+
+		if ( ! is_array( $headers ) ) {
+			$headers = array();
+		}
+
+		if ( $is_multipart ) {
+			$headers[] = 'Content-Type: multipart/form-data';
+		}
+
+		// TODO: set UA to identify requests
+
+		return $this->api_transport->send_request( $url, $method, $post_data, $headers );
+	}
+
+	protected function build_url( $url, $path, $params ) {
+		if ( $path ) {
+			$url = sprintf( '%s/%s', rtrim( $url, '/\\' ), ltrim( $path, '/\\' ) );
+		}
+
+		if ( ! parse_url( $url, PHP_URL_QUERY ) ) {
+			$url .= '?';
+		}
+
+		$url .= http_build_query( $params );
+
+		return $url; 
+	}
+
+	protected function is_valid_request_method( $method ) {
+		return in_array( $method, $this->get_valid_request_methods() );
+	}
+
+	protected function get_valid_request_methods() {
+		return $this->request_methods;
+	}
+
+	public function set_api_transport( WPCOM_REST_Transport $transport ) {
+		$this->api_transport = $transport;
+	}
+
+	public function get_api_transport() {
+		return $this->api_transport;
+	}
+
+	public function set_api_base_url( $url ) {
+		$this->api_base_url = $url;
+	}
+
+	public function get_api_base_url() {
+		return $this->api_base_url;
+	}
+}
