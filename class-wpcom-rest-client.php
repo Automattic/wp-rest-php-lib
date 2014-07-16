@@ -23,7 +23,7 @@ class WPCOM_Rest_Client {
 	const DEFAULT_API_BASE_URL = 'https://public-api.wordpress.com/rest';
 	const DEFAULT_OAUTH_BASE_URL = 'https://public-api.wordpress.com/oauth2';
 
-	private $request_methods = array( 'GET', 'POST' );
+	private $request_methods = array( self::REQUEST_METHOD_GET, self::REQUEST_METHOD_POST );
 
 	private $api_transport;
 	private $oauth_base_url = self::DEFAULT_OAUTH_BASE_URL;
@@ -124,7 +124,7 @@ class WPCOM_Rest_Client {
 	}
 
 	private function get_valid_request_methods() {
-		return array( self::REQUEST_METHOD_GET, self::REQUEST_METHOD_POST );
+		return $this->request_methods;
 	}
 
 	public function request_access_token( $authorization_code, $redirect_uri ) {
