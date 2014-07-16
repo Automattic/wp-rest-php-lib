@@ -89,7 +89,7 @@ class WPCOM_Rest_Client {
 	private function send_request( $url, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
 
 		if ( ! $this->is_valid_request_method( $method ) ) {
-			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->request_methods ) ) );
+			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->get_valid_request_methods() ) ) );
 		}
 
 		if ( ! is_array( $headers ) ) {
