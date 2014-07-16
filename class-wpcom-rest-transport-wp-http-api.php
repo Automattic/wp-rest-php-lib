@@ -8,16 +8,16 @@ class WPCOM_REST_Transport_WP_HTTP_API extends WPCOM_REST_Transport {
 		}
 	}
 
-	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
+	public function send_request( WP_REST_Request $request ) {
 		$args = array(
-			'body' => $post_data,
-			'headers' => $headers,
+			'body' => $request->get_post_data(),
+			'headers' => $request->get_processed_headers(),
 		);
 
 		if ( WPCOM_REST_Client::REQUEST_METHOD_GET === $method ) {
-			$response = wp_remote_get( $url, $args );
+			$response = wp_remote_get( $request->get_url(), $args );
 		} elseif ( WPCOM_REST_Client::REQUEST_METHOD_POST === $method ) {
-			$response = wp_remote_post( $url, $args );
+			$response = wp_remote_post( $request->get_url(), $args );
 		}
 
 		$response_code = wp_remote_retrieve_response_code( $response ); 

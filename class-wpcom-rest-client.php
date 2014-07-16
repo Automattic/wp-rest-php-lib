@@ -3,6 +3,7 @@
 // TODO: replace with spl-autoload?
 $base_dir =  dirname( __FILE__ );
 require_once( $base_dir . '/class-wp-rest-client.php' );
+require_once( $base_dir . '/class-wp-rest-request.php' );
 require_once( $base_dir . '/class-wpcom-rest-exception.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport-curl.php' );
@@ -55,15 +56,10 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 		return $this->auth_token;
 	}
 
-	protected function authenticate_request( $url, $method, $params, $post_data, $headers, $is_multipart ) {
-		// TODO: does not work yet, since we need to pass-by-reference
-		if ( ! is_array( $headers ) ) {
-			$headers = array();
-		}
-
+	protected function authenticate_request( WP_REST_Request &$request ) {
 		if ( $this->auth_token ) { 
-			$headers[] = sprintf( 'Authorization: Bearer %s', $this->auth_token );
-		}		
+			$request->add_header( 'Authorization', sprintf( 'Bearer %s', $this->auth_token ) );
+		}
 	}
 
 	public function request_access_token( $authorization_code, $redirect_uri ) {
@@ -75,7 +71,9 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 			'grant_type'    => 'authorization_code'
 		);
 
-		return $this->send_request( $this->oauth_base_url, OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data, false );
+		$request = new WP_REST_Request( $this->oauth_base_url, OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data );
+
+		return $this->send_request( $request );
 	}
 
 	public function get_blog_auth_url( $blog_url, $redirect_uri ) {

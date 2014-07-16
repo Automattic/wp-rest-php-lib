@@ -16,41 +16,35 @@ abstract class WP_REST_Client {
 		$this->set_api_transport( new WPCOM_REST_Transport_Curl ); 
 	}
 
-	protected abstract function authenticate_request( $url, $method, $params, $post_data, $headers, $is_multipart );	
+	protected abstract function authenticate_request( WP_REST_Request &$request );	
 
 	public function send_api_request( $path, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
 		$url = $this->build_url( $this->api_base_url, $path, $params );
 
-		$this->authenticate_request( $url, $method, $params, $post_data, $headers, $is_multipart );
+		$request = new WP_REST_Request( $url, $method, $post_data, $headers, $is_multipart );
+		$this->authenticate_request( $request );
 
-		return $this->send_request( $url, $method, $params, $post_data, $headers, $is_multipart );
+		return $this->send_request( $request );
 	}
 
-	protected function send_request( $url, $method, $params = array(), $post_data = array(), $headers = array(), $is_multipart = false ) {
-
-		if ( ! $this->is_valid_request_method( $method ) ) {
+	protected function send_request( WP_REST_Request $request ) {
+		// TODO: move this to WP_REST_Request?
+		if ( ! $this->is_valid_request_method( $request->get_method() ) ) {
 			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->get_valid_request_methods() ) ) );
-		}
-
-		if ( ! is_array( $headers ) ) {
-			$headers = array();
-		}
-
-		if ( $is_multipart ) {
-			$headers[] = 'Content-Type: multipart/form-data';
 		}
 
 		// TODO: set UA to identify requests
 
-		return $this->api_transport->send_request( $url, $method, $post_data, $headers );
+		return $this->api_transport->send_request( $request );
 	}
 
+	// TODO: move this to WP_REST_Request?
 	protected function build_url( $url, $path, $params ) {
 		if ( $path ) {
 			$url = sprintf( '%s/%s', rtrim( $url, '/\\' ), ltrim( $path, '/\\' ) );
 		}
 
-		if ( ! parse_url( $url, PHP_URL_QUERY ) ) {
+		if ( ! parse_url( $url, PHP_URL_QUERY ) && ! empty( $params ) ) {
 			$url .= '?';
 		}
 

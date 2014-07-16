@@ -3,7 +3,7 @@
 abstract class WPCOM_REST_Transport {
 	private $response_codes = array( 200, 301, 302 );	
 
-	abstract public function send_request( $url, $method, $post_data = array(), $headers = array() );
+	abstract public function send_request( WP_REST_Request $request );
 
 	protected function handle_success( $body ) {
 		$decoded_body = json_decode( $body );
