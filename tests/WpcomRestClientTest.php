@@ -11,11 +11,11 @@ class WpcomRestClientTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testInstanceHasCurlTransportAsDefault() {
-		$this->assertTrue( $this->client->get_api_transport() instanceof WPCOM_REST_Transport_Curl );
+		$this->assertTrue( $this->client->get_api_transport() instanceof WP_REST_Transport_Curl );
 	}
 
 	public function testSetTransport() {
-		$transport = new WPCOM_REST_Transport_Mock;
+		$transport = new WP_REST_Transport_Mock;
 		$this->client->set_api_transport( $transport ); 
 		$this->assertEquals( $transport, $this->client->get_api_transport() );
 	}

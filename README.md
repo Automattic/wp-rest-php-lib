@@ -66,5 +66,5 @@ The library supports pluggable transports. If you'd prefer to use the WordPress'
 
 ```
 $client = new WPCOM_REST_Client;
-$client->set_api_transport( new WPCOM_REST_Transport_WP_HTTP_API );
+$client->set_api_transport( new WP_REST_Transport_WP_HTTP_API );
 ```

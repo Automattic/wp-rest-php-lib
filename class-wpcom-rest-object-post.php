@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_REST_Object_Post extends WPCOM_REST_Object {
+class WPCOM_REST_Object_Post extends WP_REST_Object {
 	private $post_id;
 	private $site_id;
 

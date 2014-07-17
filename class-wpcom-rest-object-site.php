@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_REST_Object_Site extends WPCOM_REST_Object {
+class WPCOM_REST_Object_Site extends WP_REST_Object {
 	private $site_id;
 
 	protected function __construct( $site_id, WPCOM_REST_Client $client ) {

@@ -1,6 +1,6 @@
 <?php
 
-abstract class WPCOM_REST_Transport {
+abstract class WP_REST_Transport {
 	private $response_codes = array( 200, 201, 301, 302 );	
 
 	abstract public function send_request( WP_REST_Request $request );

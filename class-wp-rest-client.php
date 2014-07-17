@@ -13,7 +13,7 @@ abstract class WP_REST_Client {
 	protected $request_methods;
 
 	public function __construct() {
-		$this->set_api_transport( new WPCOM_REST_Transport_Curl ); 
+		$this->set_api_transport( new WP_REST_Transport_Curl ); 
 	}
 
 	protected abstract function authenticate_request( WP_REST_Request &$request );	
@@ -61,7 +61,7 @@ abstract class WP_REST_Client {
 		return $this->request_methods;
 	}
 
-	public function set_api_transport( WPCOM_REST_Transport $transport ) {
+	public function set_api_transport( WP_REST_Transport $transport ) {
 		$this->api_transport = $transport;
 	}
 
