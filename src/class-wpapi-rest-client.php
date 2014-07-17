@@ -36,6 +36,6 @@ class WPAPI_REST_Basic_Auth_Client extends WP_REST_Client {
 
 		$request->set_post_data( $post_data_json );
 
-		parent::send_request( $request );
+		return parent::send_request( $request );
 	}
 }
