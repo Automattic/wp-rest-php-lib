@@ -2,20 +2,18 @@
 
 class WPCOM_REST_Transport_Curl extends WPCOM_REST_Transport {
 
-	public function send_request( $url, $method, $post_data = array(), $headers = array() ) {
-		$curl = curl_init( $url );
+	public function send_request( WP_REST_Request $request ) {
+		$curl = curl_init( $request->get_url() );
 
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_FAILONERROR, false );
+		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, $request->get_method() );
 
-		if ( ! empty( $post_data ) ) {
-			curl_setopt( $curl, CURLOPT_POST, 1 );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, $post_data );
+		if ( $request->has_post_data() ) {
+			curl_setopt( $curl, CURLOPT_POSTFIELDS, $request->get_post_data() );
 		}
 
-		if ( ! empty( $headers ) ) {
-			curt_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-		}
+		curl_setopt( $curl, CURLOPT_HTTPHEADER, $request->get_processed_headers() );
 
 		$response = curl_exec( $curl );
 		$info     = curl_getinfo( $curl );
