@@ -26,12 +26,12 @@ class WPCOM_REST_Object_Post extends WP_REST_Object {
 		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_GET );
 	}
 
-	public function update_post( $post_data ) {
+	public function update( $post_data ) {
 		$url = sprintf( 'v1/sites/%s/posts/%d', $this->site_id, $this->post_id );
 		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_POST, null, $post_data );
 	}
 
-	public function delete_post() {
+	public function delete() {
 		$url = sprintf( 'v1/sites/%s/posts/%d/delete', $this->site_id, $this->post_id );
 		return $this->client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_POST );
 	}
