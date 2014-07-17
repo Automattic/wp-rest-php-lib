@@ -13,7 +13,14 @@ class WP_API_REST_Basic_Auth_Client extends WP_REST_Client {
 	private $username;
 	private $password;
 
-	protected $request_methods = array( parent::REQUEST_METHOD_GET, parent::REQUEST_METHOD_POST );
+	protected $request_methods = array(
+		parent::REQUEST_METHOD_GET,
+		parent::REQUEST_METHOD_POST,
+		parent::REQUEST_METHOD_PUT,
+		parent::REQUEST_METHOD_PATCH,
+		parent::REQUEST_METHOD_HEAD,
+		parent::REQUEST_METHOD_DELETE
+	);
 
 	public function __construct( $api_base_url, $username, $password ) {
 		parent::__construct();
