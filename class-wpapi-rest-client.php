@@ -6,7 +6,6 @@ require_once( $base_dir . '/class-wp-rest-request.php' );
 require_once( $base_dir . '/class-wpcom-rest-exception.php' );
 require_once( $base_dir . '/class-wp-rest-transport.php' );
 require_once( $base_dir . '/class-wp-rest-transport-curl.php' );
-require_once( $base_dir . '/class-wp-rest-transport-wp-http-api.php' );
 unset( $base_dir );
 
 class WPAPI_REST_Basic_Auth_Client extends WP_REST_Client {

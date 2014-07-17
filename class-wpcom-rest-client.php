@@ -7,7 +7,6 @@ require_once( $base_dir . '/class-wp-rest-request.php' );
 require_once( $base_dir . '/class-wpcom-rest-exception.php' );
 require_once( $base_dir . '/class-wp-rest-transport.php' );
 require_once( $base_dir . '/class-wp-rest-transport-curl.php' );
-require_once( $base_dir . '/class-wp-rest-transport-wp-http-api.php' );
 require_once( $base_dir . '/class-wp-rest-object.php' );
 require_once( $base_dir . '/class-wpcom-rest-object-site.php' );
 require_once( $base_dir . '/class-wpcom-rest-object-post.php' );
