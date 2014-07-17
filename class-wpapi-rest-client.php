@@ -9,7 +9,7 @@ require_once( $base_dir . '/class-wpcom-rest-transport-curl.php' );
 require_once( $base_dir . '/class-wpcom-rest-transport-wp-http-api.php' );
 unset( $base_dir );
 
-class WP_API_REST_Basic_Auth_Client extends WP_REST_Client {
+class WPAPI_REST_Basic_Auth_Client extends WP_REST_Client {
 	private $username;
 	private $password;
 
