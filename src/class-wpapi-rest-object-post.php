@@ -26,7 +26,7 @@ class WPAPI_REST_Object_Post extends WP_REST_Object {
 
 	public function update_post( $post_data ) {
 		$url = sprintf( 'posts/%d', $this->post_id );
-		return $this->client->send_api_request( $url, WP_REST_Client::REQUEST_METHOD_POST, null, $post_data );
+		return $this->client->send_api_request( $url, WP_REST_Client::REQUEST_METHOD_PUT, null, $post_data );
 	}
 
 	public function delete_post() {
