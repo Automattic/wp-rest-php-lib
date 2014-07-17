@@ -48,7 +48,9 @@ abstract class WP_REST_Client {
 			$url .= '?';
 		}
 
-		$url .= http_build_query( $params );
+		if ( ! empty( $params ) ) {
+			$url .= http_build_query( $params );
+		}
 
 		return $url; 
 	}
