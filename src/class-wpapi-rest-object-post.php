@@ -8,15 +8,15 @@ class WPAPI_REST_Object_Post extends WP_REST_Object {
 		$this->post_id = $post_id;
 	}
 
-	public static function withId( $post_id, WP_REST_Client $client ) {
+	public static function initWithId( $post_id, WP_REST_Client $client ) {
 		return new self( $post_id, $client );
 	}
 
-	public static function asNew( $post_data, WP_REST_Client $client ) {
+	public static function initAsNew( $post_data, WP_REST_Client $client ) {
 		$url = 'posts';
 		$response = $client->send_api_request( $url, WP_REST_Client::REQUEST_METHOD_POST, null, $post_data );
 
-		return self::withId( $response->ID, $client );
+		return self::initWithId( $response->ID, $client );
 	}
 
 	public function get() {

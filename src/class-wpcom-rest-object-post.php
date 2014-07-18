@@ -10,15 +10,15 @@ class WPCOM_REST_Object_Post extends WP_REST_Object {
 		$this->site_id = $site_id;
 	}
 
-	public static function withId( $post_id, $site_id, WPCOM_REST_Client $client ) {
+	public static function initWithId( $post_id, $site_id, WPCOM_REST_Client $client ) {
 		return new self( $post_id, $site_id, $client );
 	}
 
-	public static function asNew( $post_data, $site_id, WPCOM_REST_Client $client ) {
+	public static function initAsNew( $post_data, $site_id, WPCOM_REST_Client $client ) {
 		$url = sprintf( 'v1/sites/%s/posts/new', $site_id );
 
 		$response = $client->send_api_request( $url, WPCOM_REST_Client::REQUEST_METHOD_POST, null, $post_data );
-		return self::withId( $response->ID, $site_id, $client );
+		return self::initWithId( $response->ID, $site_id, $client );
 	}
 
 	public function get() {

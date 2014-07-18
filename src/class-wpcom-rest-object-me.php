@@ -5,7 +5,7 @@ class WPCOM_REST_Object_Me extends WP_REST_Object {
 		parent::__construct( $client );
 	}
 
-	public static function withAuth( WPCOM_REST_Client $client ) {
+	public static function init( WPCOM_REST_Client $client ) {
 		return new self( $client );
 	}
 
