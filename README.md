@@ -65,6 +65,7 @@ $post_data = $post->get();
 The library supports pluggable transports. If you'd prefer to use the WordPress' HTTP for example, you can pass that into your client:
 
 ```
+require_once( 'src/class-wp-rest-transport-wp-http-api.php' );
 $client = new WPCOM_REST_Client;
 $client->set_api_transport( new WP_REST_Transport_WP_HTTP_API );
 ```
