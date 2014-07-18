@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_REST_Transport_WP_HTTP_API extends WPCOM_REST_Transport {
+class WP_REST_Transport_WP_HTTP_API extends WP_REST_Transport {
 
 	public function __construct() {
 		if ( ! class_exists( 'WP_Http' ) ) {

@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_REST_Transport_Curl extends WPCOM_REST_Transport {
+class WP_REST_Transport_Curl extends WP_REST_Transport {
 
 	public function send_request( WP_REST_Request $request ) {
 		$curl = curl_init( $request->get_url() );

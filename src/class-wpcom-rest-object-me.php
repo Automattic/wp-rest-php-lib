@@ -1,11 +1,11 @@
 <?php
 
-class WPCOM_REST_Object_Me extends WPCOM_REST_Object {
+class WPCOM_REST_Object_Me extends WP_REST_Object {
 	protected function __construct( WPCOM_REST_Client $client ) {
 		parent::__construct( $client );
 	}
 
-	public static function withAuth( WPCOM_REST_Client $client ) {
+	public static function init( WPCOM_REST_Client $client ) {
 		return new self( $client );
 	}
 

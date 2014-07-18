@@ -1,9 +1,9 @@
 <?php
 
-abstract class WPCOM_REST_Object {
+abstract class WP_REST_Object {
 	protected $client;
 
-	protected function __construct( WPCOM_Rest_Client $client ) {
+	protected function __construct( WP_Rest_Client $client ) {
 	    $this->client = $client;
 	}
 

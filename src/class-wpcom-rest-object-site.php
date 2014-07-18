@@ -1,6 +1,6 @@
 <?php
 
-class WPCOM_REST_Object_Site extends WPCOM_REST_Object {
+class WPCOM_REST_Object_Site extends WP_REST_Object {
 	private $site_id;
 
 	protected function __construct( $site_id, WPCOM_REST_Client $client ) {
@@ -8,7 +8,7 @@ class WPCOM_REST_Object_Site extends WPCOM_REST_Object {
 		$this->site_id = $site_id;
 	}
 
-	public function withId( $site_id, WPCOM_REST_Client $client ) {
+	public static function initWithId( $site_id, WPCOM_REST_Client $client ) {
 		return new self( $site_id, $client );
 	}
 

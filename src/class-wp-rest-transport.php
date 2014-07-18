@@ -1,7 +1,7 @@
 <?php
 
-abstract class WPCOM_REST_Transport {
-	private $response_codes = array( 200, 301, 302 );	
+abstract class WP_REST_Transport {
+	private $response_codes = array( 200, 201, 301, 302 );	
 
 	abstract public function send_request( WP_REST_Request $request );
 
@@ -9,7 +9,7 @@ abstract class WPCOM_REST_Transport {
 		$decoded_body = json_decode( $body );
 
 		if ( ! $decoded_body ) {
-			throw new WPCOM_REST_Exception( 'Failed to decode data from endpoint', 'invalid-json' );
+			throw new WP_REST_Exception( 'Failed to decode data from endpoint', 'invalid-json' );
 		}
 
 		if ( isset( $decoded->error ) ) {
@@ -28,7 +28,7 @@ abstract class WPCOM_REST_Transport {
 	}
 
 	protected function handle_error( $message, $code ) {
-		throw new WPCOM_REST_Exception( $message, $code );
+		throw new WP_REST_Exception( $message, $code );
 	}
 
 	protected function is_valid_response_code( $response_code ) {
