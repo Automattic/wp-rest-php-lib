@@ -58,7 +58,7 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 			'grant_type'    => 'authorization_code'
 		);
 		
-		$request = new WP_REST_Request( $url, self::REQUEST_METHOD_POST, null, $post_data );
+		$request = new WP_REST_Request( $url, self::REQUEST_METHOD_POST, $post_data );
 
 		return $this->send_request( $request );
 	}
