@@ -49,6 +49,7 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 	}
 
 	public function request_access_token( $authorization_code, $redirect_uri ) {
+		$url = $this->oauth_base_url . self::OAUTH_ACCESS_TOKEN_ENDPOINT;
 		$post_data = array(
 			'client_id'     => $this->auth_key,
 			'client_secret' => $this->auth_secret,
@@ -56,8 +57,8 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 			'code'          => $authorization_code,
 			'grant_type'    => 'authorization_code'
 		);
-
-		$request = new WP_REST_Request( $this->oauth_base_url, self::OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data );
+		
+		$request = new WP_REST_Request( $url, self::REQUEST_METHOD_POST, null, $post_data );
 
 		return $this->send_request( $request );
 	}
