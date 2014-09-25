@@ -62,16 +62,18 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 		return $this->send_request( $request );
 	}
 
-	public function get_blog_auth_url( $blog_url, $redirect_uri ) {
+	public function get_blog_auth_url( $blog_url, $redirect_uri, $args ) {
 		if ( empty( $this->auth_key ) ) {
 			throw new BadMethodCallException( 'Please specify a valid auth_key.' );
 		}
 
-		return $this->build_url( $this->oauth_base_url, self::OAUTH_AUTHORIZE_ENDPOINT, array(
-			'blog' => $blog_url,
+		$args = array_merge( array(
+			'blog_id' => $blog_url,
 			'client_id' => $this->auth_key,
 			'redirect_uri' => $redirect_uri,
 			'response_type' => 'code',
-		) );
+		), $args );
+
+		return $this->build_url( $this->oauth_base_url, self::OAUTH_AUTHORIZE_ENDPOINT, $args ); 
 	}
 }
