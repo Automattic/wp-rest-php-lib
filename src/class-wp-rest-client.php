@@ -29,7 +29,8 @@ abstract class WP_REST_Client {
 
 	protected function send_request( WP_REST_Request $request ) {
 		// TODO: move this to WP_REST_Request?
-		if ( ! $this->is_valid_request_method( $request->get_method() ) ) {
+		$method = $request->get_method(); 
+		if ( ! $this->is_valid_request_method( $method ) ) {
 			throw new DomainException( sprintf( 'Invalid request $method: %s; should be one of %s', $method, implode( ',', $this->get_valid_request_methods() ) ) );
 		}
 
