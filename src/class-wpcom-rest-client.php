@@ -57,7 +57,7 @@ class WPCOM_Rest_Client extends WP_REST_Client {
 			'grant_type'    => 'authorization_code'
 		);
 
-		$request = new WP_REST_Request( $this->oauth_base_url, OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data );
+		$request = new WP_REST_Request( $this->oauth_base_url, self::OAUTH_ACCESS_TOKEN_ENDPOINT, self::REQUEST_METHOD_POST, null, $post_data );
 
 		return $this->send_request( $request );
 	}
