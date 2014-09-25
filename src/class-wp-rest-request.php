@@ -38,7 +38,7 @@ class WP_REST_Request {
 
 	public function set_headers( $headers ) {
 		$this->headers = array();
-		foreach ( $headers as $name => $content ) {
+		foreach ( (array) $headers as $name => $content ) {
 			$this->add_header( $name, $content );
 		}
 	}
