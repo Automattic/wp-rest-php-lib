@@ -28,7 +28,7 @@ class WP_REST_Transport_Curl extends WP_REST_Transport {
 			return $this->handle_error( sprintf( 'Curl error: %s; info: %s', $error, var_export( $info, true ) ), 'curl-error' );
 		}
 
-		return json_decode( $response );
+		return $this->handle_success( $response );
 	}
 
 	private function get_response_code_from_request( $info ) {
